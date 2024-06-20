@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.auth.member.model.dao.MemberDAO">
+
+	<resultMap type="com.ohgiraffers.auth.member.model.dto.MemberDTO" id="memberResultMap">
+		<id property="memberNo" column="MEMBER_NO"/>
+		<result property="memberId" column="MEMBER_ID"/>
+		<result property="memberPwd" column="MEMBER_PWD"/>
+		<result property="memberName" column="NICKNAME"/>
+		<result property="memberRole" column="MEMBER_ROLE"/>
+	</resultMap>
+
+	<insert id="insertMember" parameterType="com.ohgiraffers.auth.member.model.dto.MemberDTO">
+	INSERT INTO 
+			TBL_MEMBER (
+						MEMBER_ID
+						, MEMBER_PWD
+						, NICKNAME
+						, MEMBER_ROLE
+						)
+			VALUES (
+					#{ memberId }
+					, #{ memberPwd }
+					, #{ memberName }
+					, #{ memberRole }
+					)
+	</insert>
+	
+	<select id="selectEncryptedPwd" resultType="java.lang.String">
+	SELECT MEMBER_PWD
+	  FROM TBL_MEMBER
+	 WHERE MEMBER_ID = #{ memberId }
+	</select>
+	
+	<select id="selectLoginMember" resultMap="memberResultMap">
+	SELECT MEMBER_NO
+			, MEMBER_ID
+			, NICKNAME
+			, MEMBER_ROLE
+	  FROM TBL_MEMBER
+	 WHERE MEMBER_ID = #{ memberId }
+	</select>
+
+</mapper>

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.eunah.project.board.model.dao.BoardDAO">
+
+	<resultMap type="com.eunah.project.board.model.dto.BoardDTO"
+		id="generalBoardResultMap">
+		<id property="no" column="BOARD_NO" />
+		<result property="type" column="BOARD_TYPE" />
+		<result property="categoryCode" column="CATEGORY_CODE" />
+		<result property="title" column="BOARD_TITLE" />
+		<result property="body" column="BOARD_BODY" />
+		<result property="writerMemberNo"
+			column="BOARD_WRITER_MEMBER_NO" />
+		<result property="count" column="BOARD_COUNT" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="status" column="BOARD_STATUS" />
+		<association property="writer" resultMap="memberResultMap" />
+		<association property="category"
+			resultMap="categoryResultMap" />
+	</resultMap>
+
+	<resultMap
+		type="com.eunah.project.member.model.dto.MemberDTO"
+		id="memberResultMap">
+		<id property="no" column="MEMBER_NO" />
+		<result property="id" column="MEMBER_ID" />
+		<result property="pwd" column="MEMBER_PWD" />
+		<result property="nickname" column="NICKNAME" />
+		<result property="phone" column="PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="address" column="ADDRESS" />
+		<result property="enrollDate" column="ENROLL_DATE" />
+		<result property="role" column="MEMBER_ROLE" />
+		<result property="status" column="MEMBER_STATUS" />
+	</resultMap>
+
+	<resultMap
+		type="com.eunah.project.board.model.dto.CategoryDTO"
+		id="categoryResultMap">
+		<id property="code" column="CATEGORY_CODE" />
+		<result property="name" column="CATEGORY_NAME" />
+	</resultMap>
+
+	<resultMap type="com.eunah.project.board.model.dto.BoardDTO"
+		id="thumbnailBoardResultMap">
+		<id property="no" column="BOARD_NO" />
+		<result property="type" column="BOARD_TYPE" />
+		<result property="categoryCode" column="CATEGORY_CODE" />
+		<result property="title" column="BOARD_TITLE" />
+		<result property="body" column="BOARD_BODY" />
+		<result property="writerMemberNo"
+			column="BOARD_WRITER_MEMBER_NO" />
+		<result property="count" column="BOARD_COUNT" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="status" column="BOARD_STATUS" />
+		<association property="writer" resultMap="memberResultMap" />
+		<association property="category"
+			resultMap="categoryResultMap" />
+		<collection property="attachmentList"
+			resultMap="attachmentResultMap" />
+	</resultMap>
+
+	<resultMap
+		type="com.eunah.project.board.model.dto.AttachmentDTO"
+		id="attachmentResultMap">
+		<id property="no" column="ATTACHMENT_NO"></id>
+		<result property="refBoardNo" column="REF_BOARD_NO" />
+		<result property="originalName" column="ORIGINAL_NAME" />
+		<result property="savedName" column="SAVED_NAME" />
+		<result property="savePath" column="SAVE_PATH" />
+		<result property="fileType" column="FILE_TYPE" />
+		<result property="thumbnailPath" column="THUMBNAIL_PATH" />
+		<result property="status" column="ATTACHMENT_STATUS" />
+	</resultMap>
+
+	<select id="selectTotalCount" resultType="_int"
+		parameterType="hashmap">
+		SELECT /*
+		com.eunah.project.board.model.dao.BoardDAO#selectTotalCount() */
+		COUNT(*)
+		FROM TBL_BOARD A
+		<if test="searchCondition == 'category'">
+			JOIN TBL_CATEGORY B ON (A.CATEGORY_CODE = B.CATEGORY_CODE)
+		</if>
+		<if test="searchCondition == 'writer'">
+			JOIN TBL_MEMBER B ON (A.BOARD_WRITER_MEMBER_NO = B.MEMBER_NO)
+		</if>
+		<where>
+			<if test="searchCondition == 'category'">
+				B.CATEGORY_NAME = #{ searchValue }
+			</if>
+			<if test="searchCondition == 'writer'">
+				B.NICKNAME LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			<if test="searchCondition == 'title'">
+				A.BOARD_TITLE LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			<if test="searchCondition == 'content'">
+				A.BOARD_BODY LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			AND A.BOARD_STATUS = 'Y'
+		</where>
+	</select>
+
+	<select id="selectBoardList" resultMap="generalBoardResultMap">
+		SELECT A.BOARD_NO
+		, A.BOARD_TYPE
+		, A.CATEGORY_CODE
+		, B.CATEGORY_NAME
+		, A.BOARD_TITLE
+		, A.BOARD_BODY
+		, A.BOARD_WRITER_MEMBER_NO
+		, C.NICKNAME
+		, A.BOARD_COUNT
+		, A.CREATED_DATE
+		, A.BOARD_STATUS
+		FROM TBL_BOARD A
+		JOIN TBL_CATEGORY B ON (A.CATEGORY_CODE = B.CATEGORY_CODE)
+		JOIN TBL_MEMBER C ON (A.BOARD_WRITER_MEMBER_NO = C.MEMBER_NO)
+		<where>
+			<if test="searchCondition == 'category'">
+				B.CATEGORY_NAME = #{ searchValue }
+			</if>
+			<if test="searchCondition == 'writer'">
+				C.NICKNAME LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			<if test="searchCondition == 'title'">
+				A.BOARD_TITLE LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			<if test="searchCondition == 'content'">
+				A.BOARD_BODY LIKE CONCAT('%', #{ searchValue }, '%')
+			</if>
+			AND A.BOARD_STATUS = 'Y'
+		</where>
+		ORDER BY A.BOARD_NO DESC
+		LIMIT #{ startRow }, #{ limit }
+	</select>
+
+	<insert id="insertBoard">
+		INSERT /* com.eunah.project.board.model.dao.BoardDAO#insertBoard() */
+		INTO TBL_BOARD
+		(
+		BOARD_TYPE
+		, CATEGORY_CODE
+		, BOARD_TITLE
+		, BOARD_BODY
+		, BOARD_WRITER_MEMBER_NO
+		)
+		VALUES
+		(
+		1
+		, #{ categoryCode }
+		, #{ title }
+		, #{ body }
+		, #{ writerMemberNo }
+		)
+	</insert>
+
+	<select id="selectThumbnailList"
+		resultMap="thumbnailBoardResultMap">
+		SELECT /* com.eunah.project.board.model.dao.BoardDAO#selectThumbnailList()
+		*/
+		A.BOARD_NO
+		, A.BOARD_TITLE
+		, B.NICKNAME
+		, A.BOARD_COUNT
+		, A.CREATED_DATE
+		, C.ATTACHMENT_NO
+		, C.ORIGINAL_NAME
+		, C.SAVED_NAME
+		, C.SAVE_PATH
+		, C.THUMBNAIL_PATH
+		FROM TBL_BOARD A
+		JOIN TBL_MEMBER B ON (A.BOARD_WRITER_MEMBER_NO = B.MEMBER_NO)
+		JOIN TBL_ATTACHMENT C ON (A.BOARD_NO = C.REF_BOARD_NO)
+		WHERE A.BOARD_STATUS = 'Y'
+		AND C.ATTACHMENT_STATUS = 'Y'
+		AND C.FILE_TYPE = 'TITLE'
+		ORDER BY A.BOARD_NO DESC
+	</select>
+
+	<insert id="insertThumbnailContent">
+		INSERT /*
+		com.eunah.project.board.model.dao.BoardDAO#insertThumbnailContent() */
+		INTO TBL_BOARD
+		(
+		BOARD_TYPE
+		, BOARD_TITLE
+		, BOARD_BODY
+		, BOARD_WRITER_MEMBER_NO
+		)
+		VALUES
+		(
+		2
+		, #{ title }
+		, #{ body }
+		, #{ writerMemberNo }
+		)
+		<selectKey keyProperty="no" resultType="Integer"
+			order="AFTER">
+			SELECT AUTO_INCREMENT-1
+			FROM INFORMATION_SCHEMA.TABLES
+			WHERE TABLE_SCHEMA = 'boardproject'
+			AND TABLE_NAME = 'tbl_board'
+		</selectKey>
+	</insert>
+
+	<insert id="insertAttachment">
+		INSERT /* com.eunah.project.board.model.dao.BoardDAO#insertAttachment() */
+		INTO TBL_ATTACHMENT
+		(
+		REF_BOARD_NO
+		, ORIGINAL_NAME
+		, SAVED_NAME
+		, SAVE_PATH
+		, FILE_TYPE
+		, THUMBNAIL_PATH
+		)
+		VALUES
+		(
+		#{ refBoardNo }
+		, #{ originalName }
+		, #{ savedName }
+		, #{ savePath }
+		, #{ fileType }
+		, #{ thumbnailPath }
+		)
+	</insert>
+
+	<update id="incrementBoardCount">
+		UPDATE /* com.eunah.project.board.model.dao.BoardDAO#incrementBoardCount()
+		*/
+		TBL_BOARD
+		SET BOARD_COUNT = (SELECT A.COUNT
+		FROM (
+		SELECT BOARD_COUNT COUNT
+		FROM TBL_BOARD
+		WHERE BOARD_NO = #{ no }
+		) A
+		) + 1
+		WHERE BOARD_NO = #{ no }
+	</update>
+
+	<select id="selectOneThumbnailBoard"
+		resultMap="thumbnailBoardResultMap">
+		SELECT /*
+		com.eunah.project.board.model.dao.BoardDAO#selectOneThumbnailBoard()
+		*/
+		A.BOARD_NO
+		, A.BOARD_TITLE
+		, A.BOARD_BODY
+		, A.BOARD_WRITER_MEMBER_NO
+		, B.NICKNAME
+		, A.BOARD_COUNT
+		, A.CREATED_DATE
+		, C.ATTACHMENT_NO
+		, C.ORIGINAL_NAME
+		, C.SAVED_NAME
+		, C.SAVE_PATH
+		, C.FILE_TYPE
+		, C.THUMBNAIL_PATH
+		FROM TBL_BOARD A
+		JOIN TBL_MEMBER B ON (A.BOARD_WRITER_MEMBER_NO = B.MEMBER_NO)
+		JOIN TBL_ATTACHMENT C ON (A.BOARD_NO = C.REF_BOARD_NO)
+		WHERE A.BOARD_STATUS = 'Y'
+		AND C.ATTACHMENT_STATUS = 'Y'
+		AND A.BOARD_NO = #{ no }
+	</select>
+
+	<select id="selectBoardDetail" parameterType="_int" resultMap="generalBoardResultMap">
+    SELECT
+        B.BOARD_NO,
+        B.BOARD_TYPE,
+        B.CATEGORY_CODE,
+        C.CATEGORY_NAME,
+        B.BOARD_TITLE,
+        B.BOARD_BODY,
+        B.BOARD_WRITER_MEMBER_NO,
+        M.NICKNAME,
+        B.BOARD_COUNT,
+        B.CREATED_DATE,
+        B.MODIFIED_DATE,
+        B.BOARD_STATUS
+    FROM
+        TBL_BOARD B
+    JOIN
+        TBL_CATEGORY C ON (B.CATEGORY_CODE = C.CATEGORY_CODE)
+    JOIN
+        TBL_MEMBER M ON (B.BOARD_WRITER_MEMBER_NO = M.MEMBER_NO)
+    WHERE
+        B.BOARD_NO = #{ no }
+</select>
+
+
+
+</mapper>

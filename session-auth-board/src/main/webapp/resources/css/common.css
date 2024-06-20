@@ -1,0 +1,63 @@
+@charset "UTF-8";
+
+.divmenu {
+	display: flex;
+}
+
+.divmenu div {
+	padding: 50px;
+	margin-right: 10px;
+	background-color: skyblue;
+	border: 1px solid black;	
+}
+
+.mlist {
+	border: 10px double blue;
+}
+
+.mlist th,td {
+	border: 1px solid skyblue;
+}
+
+.blist {
+	border: 10px double coral;
+}
+
+.blist th,td {
+	border: 1px solid pink;
+}
+
+.btn-1 {
+	margin: 10px;
+	background-color: yellowgreen;
+	color: white;
+	font-size: 20px;
+	border: none;
+	border-radius: 10px;
+}
+
+.btn-2 {
+	margin: 10px;
+	background-color: red;
+	color: white;
+	font-size: 20px;
+	border: none;
+	border-radius: 10px;
+}
+
+.boardForm td {
+	border: 1px solid purple;
+	border-radius: 5px;
+}
+
+.boardForm input,textarea,button {
+	border-style: none;
+}
+
+.boardDetail {
+	width: 800px;
+}
+
+.boardDetail td:is(:first-of-type) {
+	width: 50px;
+}

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ohgiraffers.auth.board.model.dao.BoardDAO">
+
+	<resultMap
+		type="com.ohgiraffers.auth.board.model.dto.BoardDTO"
+		id="boardResultMap">
+		<id property="boardNo" column="BOARD_NO" />
+		<result property="boardTitle" column="BOARD_TITLE" />
+		<result property="boardBody" column="BOARD_BODY" />
+		<result property="boardWriter" column="BOARD_WRITER_MEMBER_NO" />
+		<result property="createdDate" column="CREATED_DATE" />
+		<result property="modifiedDate" column="MODIFIED_DATE" />
+		<result property="boardStatus" column="BOARD_STATUS" />
+	</resultMap>
+
+	<select id="selectBoardList" resultMap="boardResultMap">
+		SELECT
+		BOARD_NO
+		, BOARD_TITLE
+		, BOARD_WRITER_MEMBER_NO
+		, CREATED_DATE
+		, MODIFIED_DATE
+		, BOARD_STATUS
+		FROM TBL_BOARD
+		WHERE BOARD_STATUS = 'Y'
+	</select>
+	
+	<insert id="insertBoard" parameterType="com.ohgiraffers.auth.board.model.dto.BoardDTO">
+		INSERT INTO TBL_BOARD (
+								BOARD_TITLE
+								, BOARD_BODY
+								, BOARD_WRITER_MEMBER_NO
+								)
+						VALUES (
+								#{ boardTitle }
+								, #{ boardBody }
+								, #{ boardWriter }
+								)
+	</insert>
+	
+	<select id="selectBoardDetail" parameterType="_int" resultMap="boardResultMap">
+		SELECT 
+				BOARD_NO
+				, BOARD_TITLE
+				, BOARD_BODY
+				, BOARD_WRITER_MEMBER_NO
+				, CREATED_DATE
+				, MODIFIED_DATE
+				, BOARD_STATUS
+		  FROM 	TBL_BOARD
+		 WHERE 	BOARD_NO = #{ boardNo }
+		   AND  BOARD_STATUS = 'Y'
+	</select>
+	
+	<update id="updateBoard" parameterType="com.ohgiraffers.auth.board.model.dto.BoardDTO">
+		UPDATE 	TBL_BOARD
+		   SET 	BOARD_TITLE = #{ boardTitle }
+				, BOARD_BODY = #{ boardBody }
+				, MODIFIED_DATE = current_date
+		 WHERE 	BOARD_NO = #{ boardNo }
+	</update>
+	
+	<update id="deleteBoard" parameterType="_int">
+		UPDATE 	TBL_BOARD
+		   SET 	BOARD_STATUS = 'N'
+				, MODIFIED_DATE = current_date
+		 WHERE 	BOARD_NO = #{ boardNo }
+	</update>
+
+</mapper>
